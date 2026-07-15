@@ -1,0 +1,24 @@
+name: 'mdls_schema_consolidation'
+version: '1.0.0'
+config-version: 2
+
+profile: 'mdls_schema_consolidation'
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+vars:
+  # The Fivetran destination schema pattern the 467 SQL Server connectors land under.
+  # '%' is a SQL LIKE wildcard -- adjust to '*' if your warehouse adapter needs it.
+  source_schema_pattern: 'zzz_sql01_ft_scale_db_%'
+  source_table_count: 350
+  source_schema_count: 467
+
+models:
+  mdls_schema_consolidation:
+    consolidated:
+      +schema: consolidated
+      +materialized: view

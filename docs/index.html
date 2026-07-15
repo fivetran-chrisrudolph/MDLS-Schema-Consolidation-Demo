@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MDLS Schema Consolidation — chris_rudolph_gcs_mdls</title>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --bg-panel: #12161f;
+    --border: #232a38;
+    --text: #e4e8f1;
+    --text-dim: #8a92a6;
+    --accent: #5fd0c0;
+    --accent-dim: #2d6b62;
+    --warn: #e0a458;
+    --bad: #d16b6b;
+    --mono: "SF Mono", "Menlo", "Consolas", monospace;
+    --sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.55;
+  }
+  main {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 64px 24px 120px;
+  }
+  header.hero {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 40px;
+    margin-bottom: 48px;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: 34px;
+    line-height: 1.25;
+    margin: 0 0 16px;
+    font-weight: 650;
+  }
+  .lede {
+    color: var(--text-dim);
+    font-size: 17px;
+    max-width: 62ch;
+    margin: 0;
+  }
+  h2 {
+    font-size: 21px;
+    margin: 56px 0 18px;
+    font-weight: 650;
+  }
+  h2 .idx {
+    font-family: var(--mono);
+    color: var(--text-dim);
+    font-weight: 500;
+    margin-right: 10px;
+  }
+  p { color: var(--text); }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  .stat {
+    background: var(--bg-panel);
+    padding: 20px 18px;
+  }
+  .stat .n {
+    font-family: var(--mono);
+    font-size: 28px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .stat .n.warn { color: var(--warn); }
+  .stat .n.bad { color: var(--bad); }
+  .stat .label {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .callout {
+    border: 1px solid var(--accent-dim);
+    background: rgba(95, 208, 192, 0.06);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: 15px;
+  }
+  .callout.risk {
+    border-color: #5c3a2a;
+    background: rgba(224, 164, 88, 0.06);
+  }
+  .callout .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .callout.risk .tag { color: var(--warn); }
+  pre {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 20px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+    color: #cfe8e3;
+  }
+  code { font-family: var(--mono); }
+  .diagram {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    color: var(--text-dim);
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .diagram .stage { color: var(--text); }
+  .diagram .arrow { color: var(--accent); }
+  table.compare {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14.5px;
+  }
+  table.compare th, table.compare td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  table.compare th {
+    color: var(--text-dim);
+    font-weight: 500;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  table.compare td.bad-cell { color: var(--bad); }
+  table.compare td.good-cell { color: var(--accent); }
+  footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+
+  <header class="hero">
+    <div class="eyebrow">Fivetran &middot; dbt Labs &middot; MDLS</div>
+    <h1>467 schemas, 163,450 tables, one destination.</h1>
+    <p class="lede">
+      <code>chris_rudolph_gcs_mdls</code> is a Fivetran Managed Data Lake Service
+      destination fed by 467 identical SQL Server connectors. Each lands its own
+      schema of 350 tables. Nothing downstream can query "all of it" without
+      manually unioning 467 schemas by hand — this page documents the actual
+      shape of that problem and the dbt Labs pattern that collapses it back
+      down to something queryable.
+    </p>
+  </header>
+
+  <section>
+    <h2><span class="idx">01</span>What's actually in the account</h2>
+    <p>Pulled directly from the Fivetran API against the live <code>fivetran_sales_sandbox</code>
+      account on 2026-07-15. The number Chris estimated in Slack (60-70 schemas) was off by
+      roughly 6.7x.</p>
+    <div class="stat-grid">
+      <div class="stat"><div class="n">467</div><div class="label">SQL Server connectors, all <code>zzz_</code>-prefixed</div></div>
+      <div class="stat"><div class="n">350</div><div class="label">tables per connector schema</div></div>
+      <div class="stat"><div class="n">163,450</div><div class="label">total physical tables landed</div></div>
+      <div class="stat"><div class="n warn">30</div><div class="label">connectors <code>setup_state: broken</code></div></div>
+      <div class="stat"><div class="n bad">447</div><div class="label">connectors <code>sync_state: paused</code></div></div>
+    </div>
+    <div class="callout risk">
+      <span class="tag">Separate from this project</span>
+      30 connectors are broken (mostly <code>change_in_tls_detected</code>) and 447 are
+      paused pending reconnect. That's an operational fix in the Fivetran dashboard,
+      not a modeling problem — worth doing before trusting any consolidated output.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="idx">02</span>Why this goes sideways in production</h2>
+    <p>The schemas are all shaped identically (<code>ft_table_0001</code> ...
+      <code>ft_table_0350</code> in every one), which is exactly what makes manual
+      handling of this dangerous at this scale:</p>
+    <ul>
+      <li><strong>Catalog bloat.</strong> 163,450 tables in one destination's information_schema
+        makes metadata queries (and dbt's own catalog generation) noticeably slower.</li>
+      <li><strong>No single query surface.</strong> An analyst asking "show me row counts across
+        all 467 source databases" has to hand-write a 467-way <code>UNION ALL</code>, or more
+        realistically, doesn't ask the question.</li>
+      <li><strong>One-model-per-table doesn't scale.</strong> Hand-authoring 163,450 dbt models
+        (or even 350 x 467 staging models) is not a real option — the models have to be
+        generated from a pattern, not written by hand.</li>
+      <li><strong>Governance sprawl.</strong> 467 schemas means 467 places a permission grant,
+        a masking policy, or a retention rule can silently diverge.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="idx">03</span>The consolidation pattern</h2>
+    <div class="diagram">SQL Server x467  (ft_scale_db_0001 ... ft_scale_db_0467)
+  │  Fivetran (467 zzz_ connectors, service: sql_server)
+  ▼
+<span class="stage">chris_rudolph_gcs_mdls</span>  (MDLS destination, 467 schemas x 350 tables)
+  │  <span class="arrow">dbt Labs — dynamic relation discovery, not hand-written models</span>
+  ▼
+<span class="stage">transform/models/consolidated/</span>  (350 unified models, one per table name)
+  │
+  ▼
+BI / agents / analysts — query one table, see all 467 sources</div>
+    <p>Two <code>dbt_utils</code> macros do the actual work: <code>get_relations_by_pattern</code>
+      finds every relation across the 467 schemas that shares a given table name, and
+      <code>union_relations</code> unions them into one relation, stamping each row with which
+      source schema it came from.</p>
+    <pre>{{ macro consolidate_scale_table(table_name) }}
+  {%- set relations = dbt_utils.get_relations_by_pattern(
+      schema_pattern='zzz_sql01_ft_scale_db_%',
+      table_pattern=table_name
+  ) -%}
+  with unioned as (
+    {{ dbt_utils.union_relations(relations=relations) }}
+  )
+  select *, regexp_extract(_dbt_source_relation,
+    'zzz_sql01_ft_scale_db_(\d+)', 1) as source_scale_db_id
+  from unioned
+{{ endmacro }}</pre>
+    <p>Every one of the 350 generated models is then a one-line call:
+      <code>{{ consolidate_scale_table('ft_table_0001') }}</code>. A script
+      (<code>scripts/generate_consolidation_models.py</code>) writes all 350 files —
+      it's a five-minute regeneration if the source table count ever changes, not a
+      rewrite.</p>
+  </section>
+
+  <section>
+    <h2><span class="idx">04</span>Before / after</h2>
+    <table class="compare">
+      <thead><tr><th></th><th>Without consolidation</th><th>With this pattern</th></tr></thead>
+      <tbody>
+        <tr><td>Queryable objects</td><td class="bad-cell">163,450 raw tables</td><td class="good-cell">350 unified models</td></tr>
+        <tr><td>To add source #468</td><td class="bad-cell">hand-write 350 more models</td><td class="good-cell">nothing — the pattern already matches it</td></tr>
+        <tr><td>"All sources" query</td><td class="bad-cell">467-way manual UNION ALL</td><td class="good-cell"><code>select * from ft_table_0001</code></td></tr>
+        <tr><td>Source lineage</td><td class="bad-cell">buried in the schema name</td><td class="good-cell"><code>source_scale_db_id</code> column</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Built from live Fivetran API data against <code>fivetran_sales_sandbox</code> /
+    <code>chris_rudolph_gcs_mdls</code>, pulled 2026-07-15. No credentials are stored
+    in this repository. See <a href="https://github.com/fivetran-jasonchletsos/MDLS-Schema-Consolidation-Demo">the repo</a>
+    for the full dbt project and generator script.
+  </footer>
+
+</main>
+</body>
+</html>

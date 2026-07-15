@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+*.tfvars
+!*.tfvars.example
+transform/dbt_packages/
+transform/logs/
+transform/target/
+*.duckdb
+.DS_Store
+__pycache__/
+*.pyc

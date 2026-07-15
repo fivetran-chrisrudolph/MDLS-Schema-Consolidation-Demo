@@ -1,0 +1,35 @@
+{
+  "pulled_at": "2026-07-15",
+  "fivetran_account": "fivetran_sales_sandbox",
+  "destination": {
+    "name": "chris_rudolph_gcs_mdls",
+    "group_id": "enigma_sake",
+    "service": "managed_data_lake",
+    "created_at": "2026-07-07T19:08:57.540062Z"
+  },
+  "connectors": {
+    "service": "sql_server",
+    "count": 467,
+    "schema_naming_pattern": "zzz_sql01_ft_scale_db_####",
+    "schema_number_range": [1, 467],
+    "source_schema": "dbo",
+    "tables_per_connector": 350,
+    "table_naming_pattern": "ft_table_####",
+    "table_number_range": [1, 350],
+    "total_physical_tables": 163450,
+    "setup_state_breakdown": {
+      "connected": 437,
+      "broken": 30
+    },
+    "sync_state_breakdown": {
+      "paused": 447,
+      "scheduled": 20
+    }
+  },
+  "notes": [
+    "Chris Rudolph estimated 60-70 schemas in Slack; live account shows 467 zzz_-prefixed SQL Server connectors, all in group chris_rudolph_gcs_mdls.",
+    "All 467 connectors share an identical schema shape (350 identically-named tables per connector), consistent with a generated scale-test dataset rather than 467 distinct source systems.",
+    "30 connectors are setup_state=broken (mostly change_in_tls_detected); 447 are sync_state=paused pending reconnect. These need remediation independent of the consolidation work.",
+    "No credentials are stored in this file or anywhere else in this repo."
+  ]
+}
